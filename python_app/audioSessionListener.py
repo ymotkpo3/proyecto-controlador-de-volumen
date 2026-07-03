@@ -30,7 +30,7 @@ class SessionListener(MagicSession):
                 if friendly_pid == app.topProcessPID:
 
                     if self.magic_root_session.pid not in app.audioSessionPIDs:
-
+                        print("sincronizando")
                         au.SyncVolume(
                             self.magic_root_session.pid,
                             app
