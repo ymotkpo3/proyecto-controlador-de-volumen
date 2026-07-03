@@ -1,6 +1,10 @@
 import psutil
 from python_app.config import SYSTEM, IGNORED
 
+# Known limitation:
+# Some applications based on helper processes or WebView2 may appear under the helper process name instead of the user-facing application name and that is the reason why this file does what it does.
+# This will be improved in a future version using Windows application identity resolution instead of an heuristic.
+
 def resolveFriendlyProcessPID(PID: int) -> int | None:
     """
     Resolves the user-facing process associated with an audio session.
