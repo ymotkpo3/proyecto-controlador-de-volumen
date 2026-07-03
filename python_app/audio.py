@@ -57,6 +57,21 @@ def getGroupedAudioSessions() -> dict[int, dict[str, list]]:
 
     return result
 
+def getProcessSessions(pid: int) -> list:
+    """
+    Returns all audio sessions associated with a process PID.
+
+    This is different from AudioUtilities.GetProcessSession(pid),
+    which returns only the first matching session.
+    """
+
+    sessions = []
+
+    for session in AudioUtilities.GetAllSessions():
+        if session.ProcessId == pid:
+            sessions.append(session)
+
+    return sessions
 
 def volumeUp(app: AudioApp | None = None) -> None:
     """
@@ -136,18 +151,82 @@ def getVolume(app: AudioApp) -> float:
 
     return app.sessions[0].SimpleAudioVolume.GetMasterVolume()
 
+def clampVolume(volume: float) -> float:
+    """
+    Clamps a volume value to the valid WASAPI range.
 
-def setFixedVolume(PID, fixVolume):
+    Args:
+        volume:
+            Volume value to clamp.
 
-    session = AudioUtilities.GetProcessSession(PID)
+    Returns:
+        Volume value constrained to the range [0.0, 1.0].
+    """
 
-    session.SimpleAudioVolume.SetMasterVolume(fixVolume, None)
+    return max(0.0, min(1.0, volume))
 
 
-def SyncVolume(PID, app: AudioApp):
+def setFixedVolume(pid: int, fixed_volume: float) -> None:
+    """
+    Sets a fixed volume for all audio sessions associated with a process PID.
 
-    session = AudioUtilities.GetProcessSession(PID)
+    Args:
+        pid:
+            Process ID whose audio sessions should be modified.
 
-    new_volume = app.sessions[0].SimpleAudioVolume.GetMasterVolume()
+        fixed_volume:
+            Desired volume level in the range [0.0, 1.0].
+    """
 
-    session.SimpleAudioVolume.SetMasterVolume(getVolume(app), None)
+    fixed_volume = clampVolume(fixed_volume)
+
+    for session in getProcessSessions(pid):
+        session.SimpleAudioVolume.SetMasterVolume(
+            fixed_volume,
+            None
+        )
+
+
+def syncVolume(pid: int, app: AudioApp) -> None:
+    """
+    Synchronizes all audio sessions associated with a PID to an app volume.
+
+    The target volume is taken from the current logical volume of the
+    provided AudioApp.
+
+    Args:
+        pid:
+            Process ID whose audio sessions should be synchronized.
+
+        app:
+            AudioApp used as the volume reference.
+    """
+
+    volume = getVolume(app)
+
+    for session in getProcessSessions(pid):
+        session.SimpleAudioVolume.SetMasterVolume(
+            volume,
+            None
+        )
+
+def setMagicSessionVolume(magic_root_session, volume: float) -> None:
+    """
+    Sets the volume of a specific PyCAW MagicSession root session.
+
+    This is used by the audio session listener when it receives a concrete
+    session object. In that case, there is no need to search for a session
+    again by PID.
+
+    Args:
+        magic_root_session:
+            MagicSession root session object.
+
+        volume:
+            Desired volume level in the range [0.0, 1.0].
+    """
+
+    magic_root_session._sav.SetMasterVolume(
+        clampVolume(volume),
+        None
+    )

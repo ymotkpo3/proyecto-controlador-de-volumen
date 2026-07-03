@@ -1,12 +1,14 @@
 import time
 import serial
 
+import pycaw.magic
+import python_app.audioSessionListener
+
 from python_app import connection as con
 from python_app import appBuilder as ab
 from python_app import communication as com
 from python_app import debug as deb
 from python_app.models.app_state import state as ST
-import python_app.audioSessionListener
 
 
 ST.apps = ab.refreshApps()
@@ -20,7 +22,7 @@ ser = con.connect()
 while True:
 
     try:
-        
+
         if ser is None:
             ser = con.reconnect()
 
@@ -37,12 +39,17 @@ while True:
 
         if msg:
             result = com.handleSerialCom(msg, ST.apps, ST.selectedIndex)
+
             ST.apps = result.apps
             ST.selectedIndex = result.selected_index
-            
-            deb.printDebugMessage(ST.apps, ST.selectedIndex, result.debug_message)
 
-    except(serial.SerialException):
+            deb.printDebugMessage(
+                ST.apps,
+                ST.selectedIndex,
+                result.debug_message
+            )
+
+    except serial.SerialException:
 
         if ser is not None:
             print("DISCONNECTED")
