@@ -51,10 +51,14 @@ def connect() -> serial.Serial | None:
     port = findDevicePort()
 
     if port is None:
-
         return None
 
-    return createSerialConnection(port)
+    try:
+        return createSerialConnection(port)
+
+    except serial.SerialException as error:
+        print(f"Could not open serial port {port}: {error}")
+        return None
 
 def readSerial(ser: serial.Serial) -> str | None:
     """

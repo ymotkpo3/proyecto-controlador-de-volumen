@@ -2,6 +2,9 @@ import sys
 import time
 import serial
 
+
+from python_app import singleInstance
+
 import pycaw.magic
 import python_app.audioSessionListener
 
@@ -16,6 +19,8 @@ from python_app import systemTray
 from python_app.overlay import manager as overlayManager
 from python_app.models.app_state import state as ST
 
+if singleInstance.isAlreadyRunning():
+    sys.exit(0)
 
 qt_app = QApplication(sys.argv)
 

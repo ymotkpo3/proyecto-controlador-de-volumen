@@ -3,3 +3,6 @@ __pycache__/
 python_app/pruebas/
 ./changelog.md
 .vscode
+build/
+dist/
+megaknob.spec
