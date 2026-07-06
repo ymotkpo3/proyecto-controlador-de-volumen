@@ -81,12 +81,6 @@ def _toggleStartup(enabled: bool) -> None:
 
 
 def _createTrayIcon() -> QIcon:
-    """
-    Creates a simple tray icon for Megaknob.
-
-    Returns:
-        QIcon used by the Windows system tray.
-    """
 
     size = 64
 

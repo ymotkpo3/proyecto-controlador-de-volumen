@@ -34,13 +34,6 @@ lastReconnectAttempt = 0.0
 RECONNECT_INTERVAL = 1.0
 
 def serialTick():
-    """
-    Runs one iteration of the serial communication loop.
-
-    This replaces the old while True loop so Qt can keep control of the
-    main event loop. The behavior is the same: reconnect if needed, read
-    serial messages, process commands and update the global app state.
-    """
 
     global ser
 
@@ -91,9 +84,6 @@ def serialTick():
 
 
 def cleanup():
-    """
-    Closes the serial connection before the application exits.
-    """
 
     if ser is not None:
         ser.close()
