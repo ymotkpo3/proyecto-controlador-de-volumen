@@ -2,13 +2,32 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QAction, QIcon, QPainter, QPen, QColor, QPixmap, QGuiApplication
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from python_app import startup
-
+import sys
+from pathlib import Path
 
 _tray = None
 _menu = None
 _startup_action = None
 _exit_action = None
 
+def _getResourcePath(relative_path: str) -> str:
+    """
+    Returns an absolute path for bundled or development resources.
+
+    Args:
+        relative_path:
+            Resource path relative to the project root.
+
+    Returns:
+        Absolute filesystem path.
+    """
+
+    if getattr(sys, "frozen", False):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).resolve().parent.parent
+
+    return str(base_path / relative_path)
 
 def init() -> None:
     """
@@ -30,10 +49,9 @@ def init() -> None:
         return
 
     _tray = QSystemTrayIcon(
-        _createTrayIcon(),
+        QIcon(_getResourcePath("assets/megaknob.ico")),
         QApplication.instance()
     )
-
     _tray.setToolTip("Megaknob")
 
     _menu = QMenu()
