@@ -1,15 +1,14 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt, QRect
-from PySide6.QtGui import QPainter, QPen, QFont
+from PySide6.QtGui import QPainter, QPen, QFont, QColor, QGuiApplication
 
 
 class Overlay(QWidget):
     """
-    Small always-on-top overlay used to display the selected app and volume.
+    Small always-on-top overlay used to display app selection and volume.
 
-    The widget is intentionally simple:
-    - selection mode shows the app icon or a text fallback.
-    - volume mode shows the app icon and a circular volume indicator.
+    Selection mode shows only the app icon or a text fallback.
+    Volume mode shows the app icon and a circular volume indicator.
     """
 
     def __init__(self):
@@ -42,37 +41,85 @@ class Overlay(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
 
-        painter.setRenderHint(QPainter.Antialiasing, True)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        painter.setRenderHint(
+            QPainter.RenderHint.Antialiasing,
+            True
+        )
 
-        background_rect = QRect(0, 0, self.width(), self.height())
+        painter.setRenderHint(
+            QPainter.RenderHint.SmoothPixmapTransform,
+            True
+        )
 
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(Qt.black)
-        painter.drawRoundedRect(background_rect, 12, 12)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor(0, 0, 0, 220))
 
-        ring_rect = QRect(5, 5, 46, 46)
-
-        # background_pen = QPen(Qt.darkGray)
-        # background_pen.setWidth(3)
-        # painter.setPen(background_pen)
-        painter.drawEllipse(ring_rect)
+        painter.drawRoundedRect(
+            QRect(0, 0, self.width(), self.height()),
+            13,
+            13
+        )
 
         if self.mode == "volume":
-            progress_pen = QPen(Qt.white)
-            progress_pen.setWidth(3)
-            painter.setPen(progress_pen)
+            self._drawVolumeRing(painter)
 
-            span = int(360 * self.volume * 16)
+        self._drawIconOrLabel(painter)
 
-            painter.drawArc(
-                ring_rect,
-                90 * 16,
-                -span
-            )
+        painter.end()
+
+    def _drawVolumeRing(self, painter: QPainter) -> None:
+        """
+        Draws the volume progress ring.
+
+        No background ring is drawn. Only the current volume arc is visible.
+        """
+
+        if self.volume <= 0.0:
+            return
+
+        ring_rect = QRect(
+            10,
+            10,
+            36,
+            36
+        )
+
+        accent_color = QGuiApplication.palette().highlight().color()
+
+        progress_pen = QPen(accent_color)
+        progress_pen.setWidth(3)
+
+        if self.volume < 0.999:
+            progress_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        else:
+            progress_pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+        painter.setPen(progress_pen)
+
+        if self.volume >= 0.999:
+            painter.drawEllipse(ring_rect)
+            return
+
+        span = int(
+            360 *
+            self.volume *
+            16
+        )
+
+        painter.drawArc(
+            ring_rect,
+            90 * 16,
+            -span
+        )
+
+    def _drawIconOrLabel(self, painter: QPainter) -> None:
+        """
+        Draws the app icon or a text fallback.
+        """
 
         if self.icon:
-            icon_size = 26
+            icon_size = 22
 
             x = (self.width() - icon_size) // 2
             y = (self.height() - icon_size) // 2
@@ -85,23 +132,26 @@ class Overlay(QWidget):
                 self.icon
             )
 
-        elif self.label:
-            painter.setPen(Qt.white)
+            return
+
+        if self.label:
+            painter.setPen(Qt.GlobalColor.white)
 
             font = QFont()
             font.setBold(True)
-            font.setPointSize(13)
+            font.setPointSize(12)
+
             painter.setFont(font)
 
             painter.drawText(
                 self.rect(),
-                Qt.AlignCenter,
+                Qt.AlignmentFlag.AlignCenter,
                 self.label
             )
 
     def showVolume(self, icon, volume: float, label: str = "") -> None:
         """
-        Updates the overlay to display app volume.
+        Shows the overlay in volume mode.
 
         Args:
             icon:
@@ -125,7 +175,7 @@ class Overlay(QWidget):
 
     def showSelection(self, icon, label: str = "") -> None:
         """
-        Updates the overlay to display the selected app.
+        Shows the overlay in selection mode.
 
         Args:
             icon:

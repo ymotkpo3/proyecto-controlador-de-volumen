@@ -2,7 +2,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QGuiApplication
 
 from python_app.overlay.overlay import Overlay
-from python_app.overlay.icons import getAppPixmap
+from python_app.overlay.icons import getAppPixmap, getMasterPixmap
 from python_app import audio
 
 
@@ -104,7 +104,18 @@ def _getIcon(app):
     Returns a cached icon for an AudioApp.
     """
 
-    if app is None or app.execPath is None:
+    if app is None:
+        return None
+
+    if app.isMaster:
+        key = "__master__"
+
+        if key not in _icon_cache:
+            _icon_cache[key] = getMasterPixmap()
+
+        return _icon_cache[key]
+
+    if app.execPath is None:
         return None
 
     if app.execPath not in _icon_cache:

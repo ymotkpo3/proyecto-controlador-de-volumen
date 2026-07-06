@@ -36,7 +36,7 @@ def createSerialConnection(port: str) -> serial.Serial:
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
-        timeout=2
+        timeout=0.01
     )
 
 def connect() -> serial.Serial | None:
@@ -70,13 +70,15 @@ def readSerial(ser: serial.Serial) -> str | None:
             otherwise None.
     """
 
-    line = ser.readline()
-    
-    if line:
+    if ser.in_waiting <= 0:
+        return None
 
-        return line.decode().strip()
-    
-    return None
+    line = ser.readline()
+
+    if not line:
+        return None
+
+    return line.decode(errors="ignore").strip() or None
 
 def reconnect() -> serial.Serial | None:
     """

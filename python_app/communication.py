@@ -45,7 +45,7 @@ def handleSerialCom(msg: str, apps: list[AudioApp], selected_index: int) -> Seri
     elif msg == "master":
         selected_index = 0
 
-        overlayManager.showSelection(apps[selected_index])
+        overlayManager.showVolume(apps[selected_index])
 
         return SerialComResult(apps, selected_index, "master")
 
@@ -90,6 +90,11 @@ def handleSerialCom(msg: str, apps: list[AudioApp], selected_index: int) -> Seri
         overlayManager.showVolume(apps[selected_index])
 
         return SerialComResult(apps, selected_index, "volDWN")
+    
+    elif msg == "vol":
+        overlayManager.showVolume(apps[selected_index])
+
+        return SerialComResult(apps, selected_index, "vol")
 
     else:
         return SerialComResult(

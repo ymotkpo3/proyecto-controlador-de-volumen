@@ -109,6 +109,7 @@ void loop() {
         mode = MODE_SELECT;
       } else if (mode == MODE_SELECT){
         mode = MODE_VOLUME;
+        Serial.println("vol");
       }
     }
   }

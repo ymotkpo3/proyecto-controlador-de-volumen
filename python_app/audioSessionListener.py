@@ -6,15 +6,10 @@ from python_app import audio as au
 from python_app import processes as proc
 from python_app import appBuilder as ab
 
-
-defaultVolume = 1.0
-
-
 class SessionListener(MagicSession):
     """
     Handles audio session creation events.
 
-    Existing sessions are initialized before the application list is built.
     New sessions created later are synchronized with the volume of the
     matching AudioApp when possible.
     """
@@ -26,13 +21,6 @@ class SessionListener(MagicSession):
         session_pid = self.magic_root_session.pid
 
         if session_pid == 0:
-            return
-
-        if not AS.apps:
-            au.setMagicSessionVolume(
-                self.magic_root_session,
-                defaultVolume
-            )
             return
 
         friendly_pid = proc.resolveFriendlyProcessPID(session_pid)
