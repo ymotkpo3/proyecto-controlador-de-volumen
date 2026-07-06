@@ -35,13 +35,10 @@ Megaknob uses a single encoder and dynamic application selection, resulting in a
 - [x] Master volume control
 - [x] Dynamic session detection
 - [x] Device reconnection
+- [x] Overlay notifications
 
 ### Planned
 
-- [ ] Overlay notifications
-- [ ] Windows installer
 - [ ] Better process identification
 - [ ] Graphical user interface
 - [ ] Detailed project wiki
-- [ ] Multi-platform support
-- [ ] RGB LED feedback
