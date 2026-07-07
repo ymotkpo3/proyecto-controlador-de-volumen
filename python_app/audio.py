@@ -1,10 +1,43 @@
 from pycaw.pycaw import AudioUtilities
 from python_app import processes as proc
 from python_app.models.audio_app import AudioApp
-
+import psutil
 
 device = AudioUtilities.GetSpeakers()
 
+def isValidAudioSession(session) -> bool:
+    """
+    Checks whether an audio session is usable by the application.
+
+    A valid session must have an associated process and that process must
+    still exist. Sessions with dead or missing processes are ignored because
+    they cannot be reliably grouped or shown to the user.
+
+    Args:
+        session:
+            PyCAW audio session.
+
+    Returns:
+        True if the session has a live associated process, otherwise False.
+    """
+
+    try:
+        if not session.Process:
+            return False
+
+        pid = session.Process.pid
+
+        if pid == 0:
+            return False
+
+        return psutil.pid_exists(pid)
+
+    except (
+        psutil.NoSuchProcess,
+        psutil.AccessDenied,
+        psutil.ZombieProcess
+    ):
+        return False
 
 def getGroupedAudioSessions() -> dict[int, dict[str, list]]:
     """
@@ -32,8 +65,7 @@ def getGroupedAudioSessions() -> dict[int, dict[str, list]]:
 
     for session in sessions:
 
-        if not session.Process:
-            
+        if not isValidAudioSession(session):
             continue
 
         audio_pid = session.Process.pid
