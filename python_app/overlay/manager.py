@@ -51,7 +51,7 @@ def showSelection(app) -> None:
         _getLabel(app)
     )
 
-    _hide_timer.start(900)
+    _hide_timer.start(1000)
 
 
 def showVolume(app) -> None:
@@ -74,7 +74,7 @@ def showVolume(app) -> None:
         _getLabel(app)
     )
 
-    _hide_timer.start(900)
+    _hide_timer.start(1000)
 
 
 def _positionOverlay() -> None:
